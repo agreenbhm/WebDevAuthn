@@ -1,7 +1,7 @@
 # WebDevAuthn
 A tool to test &amp; analyze FIDO2/WebAuthn requests and responses
 
- - WebDevAuthn Web Tool: https://gramthanos.github.io/WebDevAuthn/
+ - WebDevAuthn Web Tool: http://localhost:8080/WebDevAuthn
  - Chrome Extension: https://chrome.google.com/webstore/detail/webdevauthn/aofdjdfdpmfeohecddhgdjfnigggddpd
  - Firefox Extension: https://addons.mozilla.org/firefox/addon/webdevauthn/
 

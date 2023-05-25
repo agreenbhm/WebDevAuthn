@@ -210,6 +210,7 @@ window.AuthnDevice = (function (localURL) {
 			return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
 		});
 		data = new Uint8Array(data.split('').map(function (c) {return c.charCodeAt (0);}));
+		
 		// Prepare an IV
 		let iv = window.crypto.getRandomValues(new Uint8Array(12));
 		((s) => {s=window.atob(s+'+');for (let i = 0; i < s.length; i++) iv[i] = s[i].charCodeAt(0)})('GramThanos'); // TODO: This is not needed :P, it can be removed
@@ -222,6 +223,15 @@ window.AuthnDevice = (function (localURL) {
 		r.set(new Uint8Array(cipher), iv.byteLength);
 
 		this.credential_id = r.buffer;
+		
+		var idString = 'nxbGsNAKfXq4oK01GghxjNmRwaLqaRMw_8EtStXpfSQpk4Mjhjrh0SUmRx32bRLT4eoq9Tf7bR6VWfOuvwtOaQ';
+		var buf = new ArrayBuffer(idString.length);
+		var bufView = new Uint8Array(buf);
+		for (var i = 0, strLen=idString.length; i < strLen; i++){
+			bufView[i] = idString.charCodeAt(i);
+		}
+		this.credential_id = bufView.buffer;
+
 	};
 
 	AuthnDevice.prototype._retrieveFromKeyId = async function(keyid) {
@@ -499,7 +509,7 @@ window.AuthnDevice = (function (localURL) {
 			'challenge': window.authnTools.uint8ArrayToBase64url(challenge),
 			'origin': origin,
 			'crossOrigin': false,
-			'virtual_authenticator' : 'GramThanos & University of Piraeus'
+			//'virtual_authenticator' : 'GramThanos & University of Piraeus'
 		}
 		//console.log(client_data);
 		client_data = JSON.stringify(client_data);
@@ -557,16 +567,16 @@ window.AuthnDevice = (function (localURL) {
 					indentifier : 424242424242,
 					// Issued by
 					issuedBy : {
-						countryName : 'GR', // Subject-C: ISO 3166 code specifying the country where the Authenticator vendor is incorporated
-						organizationName : 'UNIPI SSL', // Subject-O: Legal name of the Authenticator vendor
-						commonName : 'UNIPI FIDO2 Virtual Authenticator CA', // Subject-CN: A string of the vendor’s choosing
+						//countryName : 'Yubico U2F Root CA Serial 457200631', // Subject-C: ISO 3166 code specifying the country where the Authenticator vendor is incorporated
+						//organizationName : 'UNIPI SSL', // Subject-O: Legal name of the Authenticator vendor
+						commonName : 'Yubico U2F Root CA Serial 457200631'//, // Subject-CN: A string of the vendor’s choosing
 					},
 					// Issued to
 					issuedTo : {
-						countryName : 'GR', // Subject-C: ISO 3166 code specifying the country where the Authenticator vendor is incorporated
-						organizationName : 'UNIPI SSL', // Subject-O: Legal name of the Authenticator vendor
+						countryName : 'SE', // Subject-C: ISO 3166 code specifying the country where the Authenticator vendor is incorporated
+						organizationName : 'Yubico AB', // Subject-O: Legal name of the Authenticator vendor
 						organizationalUnitName : 'Authenticator Attestation', // Subject-OU: Literal string "Authenticator Attestation"
-						commonName : 'UNIPI FIDO2 Virtual Authenticator', // Subject-CN: A string of the vendor’s choosing
+						commonName : 'Yubico U2F EE Serial 1155109599', // Subject-CN: A string of the vendor’s choosing
 					},
 
 					// AAGUID
@@ -584,7 +594,8 @@ window.AuthnDevice = (function (localURL) {
 
 		// Return Credentials
 		return new (VirtualPublicKeyCredential())({
-			'id': window.authnTools.uint8ArrayToBase64url(credential_id),
+			//'id': window.authnTools.uint8ArrayToBase64url(credential_id),
+			'id': 'nxbGsNAKfXq4oK01GghxjNmRwaLqaRMw_8EtStXpfSQpk4Mjhjrh0SUmRx32bRLT4eoq9Tf7bR6VWfOuvwtOaQ',
 			'rawId': credential_id.buffer.slice(0),
 			'response': {
 				'attestationObject': window.CBOR.encode(attestation_object),
@@ -698,7 +709,7 @@ window.AuthnDevice = (function (localURL) {
 			'challenge': window.authnTools.uint8ArrayToBase64url(challenge),
 			'origin': origin,
 			'crossOrigin' : false,
-			'virtual_authenticator' : 'GramThanos & University of Piraeus'
+			//'virtual_authenticator' : 'GramThanos & University of Piraeus'
 		}
 		client_data = JSON.stringify(client_data);
 		client_data = new TextEncoder().encode(client_data);
@@ -1307,9 +1318,9 @@ window.AuthnDevice = (function (localURL) {
 				// Issuer Field
 				[
 					// countryName
-					new Set([['OBJECT-IDENTIFIER{2.5.4.6}', info.issuedBy.countryName]]),
+					//new Set([['OBJECT-IDENTIFIER{2.5.4.6}', info.issuedBy.countryName]])//,
 					// organizationName
-					new Set([['OBJECT-IDENTIFIER{2.5.4.10}', 'UTF8{' + info.issuedBy.organizationName + '}']]),
+					//new Set([['OBJECT-IDENTIFIER{2.5.4.10}', 'UTF8{' + info.issuedBy.organizationName + '}']]),
 					// commonName
 					new Set([['OBJECT-IDENTIFIER{2.5.4.3}', info.issuedBy.commonName]])
 				],
@@ -1343,14 +1354,25 @@ window.AuthnDevice = (function (localURL) {
 				{
 					tag : 0xA3,
 					val : [
-						[ // If the related attestation root certificate is used for multiple authenticator models
-							'OBJECT-IDENTIFIER{1.3.6.1.4.1.45724.1.1.4}', // id-fido-gen-ce-aaguid
-							//'OCTET-STRING-HEX{04 10 14 9A 20 21 8E F6 41 33 96 B8 81 F8 D5 B7 F1 F5}', // AAGUID
-							this.tagDER('OCTET-STRING', this.tagDER('OCTET-STRING', info.aaguid))
+						[ // Transport extension Firmware version
+							'OBJECT-IDENTIFIER{1.3.6.1.4.1.41482.13.1}',
+							'OCTET-STRING-HEX{04 03 05 04 03}' // 5.4.3
+						],
+						[ // Transport extension U2F Device identifier
+							'OBJECT-IDENTIFIER{1.3.6.1.4.1.41482.2}',
+							'OCTET-STRING-HEX{31 2e 33 2e 36 2e 31 2e 34 2e 31 2e 34 31 34 38 32 2e 31 2e 37}' // YubiKey 5
+							//'OCTET-STRING-HEX{04 10 2F C0 57 9F 81 13 47 EA B1 16 BB 5A 8D B9 20 2A}' // YubiKey 5
 						],
 						[ // Transport extension fidoU2FTransports
 							'OBJECT-IDENTIFIER{1.3.6.1.4.1.45724.2.1.1}',
-							'OCTET-STRING-HEX{03 02 05 20}' // USB-internal
+							'OCTET-STRING-HEX{03 02 04 30}' // USB-internal
+						],
+						[ // If the related attestation root certificate is used for multiple authenticator models
+							'OBJECT-IDENTIFIER{1.3.6.1.4.1.45724.1.1.4}', // id-fido-gen-ce-aaguid
+							//'OCTET-STRING-HEX{04 10 14 9A 20 21 8E F6 41 33 96 B8 81 F8 D5 B7 F1 F5}', // AAGUID
+							//this.tagDER('OCTET-STRING', this.tagDER('OCTET-STRING', info.aaguid))
+							this.tagDER('OCTET-STRING', this.tagDER('OCTET-STRING', new Uint8Array(
+								[47, 192, 87, 159, 129, 19, 71, 234, 177, 22, 187, 90, 141, 185, 32, 42])))
 						],
 						[ // Basic Constraints
 							'OBJECT-IDENTIFIER{2.5.29.19}',

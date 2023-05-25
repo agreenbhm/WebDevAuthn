@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 	let analyser = {
-		domain : 'https://gramthanos.github.io/WebDevAuthn',
+		domain : 'http://localhost:8080/WebDevAuthn',
 		createPath : '/credential-creation.html',
 		getPath : '/credential-get.html'
 	}
